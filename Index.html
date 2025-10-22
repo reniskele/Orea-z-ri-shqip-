@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R Audio - Sintetizues Shqip</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 100%; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+        .app-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        textarea { 
+            width: 100%; 
+            height: 150px; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .controls { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin: 15px 0;
+        }
+        button { 
+            padding: 15px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .speak-btn { 
+            background: #3498db; 
+            color: white; 
+            grid-column: span 2;
+        }
+        .control-btn { 
+            background: #f8f9fa; 
+            color: #333; 
+            border: 2px solid #e9ecef;
+        }
+        .stop-btn { 
+            background: #e74c3c; 
+            color: white; 
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .playing {
+            background: #d4edda;
+            color: #155724;
+        }
+        .paused {
+            background: #fff3cd;
+            color: #856404;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="app-icon">🎵</div>
+            <h1>R Audio - Sintetizues Shqip</h1>
+            <p>Ktheni tekstin në audio me zë shqip</p>
+        </header>
+        
+        <textarea id="textInput" placeholder="Shkruani tekstin këtu...">Mirëdita! Ky është aplikacioni R Audio për gjenerim audio nga tekst.</textarea>
+        
+        <div class="controls">
+            <button class="speak-btn" onclick="speakText()">🔊 LEXO TEKSTIN</button>
+            <button class="control-btn" onclick="pauseSpeech()">⏸️ PAUZË</button>
+            <button class="control-btn" onclick="resumeSpeech()">▶️ VAZHDO</button>
+            <button class="stop-btn" onclick="stopSpeech()">⏹️ NDALO</button>
+        </div>
+        
+        <div id="status" class="status">Gati për përdorim</div>
+        
+        <footer>
+            <p>R Audio v1.0 | Gjenerim Audio Shqip</p>
+        </footer>
+    </div>
+
+    <script>
+        function speakText() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                showStatus('Ju lutem shkruani tekst!', 'paused');
+                return;
+            }
+            
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'sq-AL';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+            
+            utterance.onstart = function() {
+                showStatus('🔊 Po lexohet...', 'playing');
+            };
+            
+            utterance.onend = function() {
+                showStatus('✅ Leximi përfundoi', 'paused');
+            };
+            
+            utterance.onerror = function(event) {
+                showStatus('❌ Gabim: ' + event.error, 'paused');
+            };
+            
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        function pauseSpeech() {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.pause();
+                showStatus('⏸️ Pauzuar', 'paused');
+            }
+        }
+        
+        function resumeSpeech() {
+            if (window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
+                showStatus('▶️ Po vazhdohet...', 'playing');
+            }
+        }
+        
+        function stopSpeech() {
+            window.speechSynthesis.cancel();
+            showStatus('⏹️ U ndal', 'paused');
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+    </script>
+</body>
+</html>
